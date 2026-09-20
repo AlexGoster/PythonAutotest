@@ -1,0 +1,92 @@
+version: "3.9"
+
+services:
+  selenium-hub:
+    image: selenium/hub:4.25.0
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  chrome:
+    image: selenium/node-chrome:4.25.0
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=2
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_VNC_NO_PASSWORD=1
+    shm_size: "2g"
+    ports:
+      - "7900:5900"
+
+  firefox:
+    image: selenium/node-firefox:4.25.0
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=2
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_VNC_NO_PASSWORD=1
+    shm_size: "2g"
+    ports:
+      - "7901:5900"
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+    environment:
+      - SELENIUM_GRID_URL=http://selenium-hub:4444/wd/hub
+      - BASE_URL=${BASE_URL:-https://the-internet.herokuapp.com}
+      - AUTH_USERNAME=${AUTH_USERNAME:-tomsmith}
+      - AUTH_PASSWORD=${AUTH_PASSWORD:-SuperSecretPassword!}
+      - HEADLESS=true
+      - BROWSER=chrome
+    volumes:
+      - ./reports:/app/reports
+      - ./screenshots:/app/screenshots
+    networks:
+      - test-network
+
+  # Standalone runner — runs tests directly without Selenium Grid
+  tests-local:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - BASE_URL=${BASE_URL:-https://the-internet.herokuapp.com}
+      - AUTH_USERNAME=${AUTH_USERNAME:-tomsmith}
+      - AUTH_PASSWORD=${AUTH_PASSWORD:-SuperSecretPassword!}
+      - HEADLESS=true
+      - BROWSER=chrome
+    volumes:
+      - ./reports:/app/reports
+      - ./screenshots:/app/screenshots
+    # Override CMD to run locally without Grid
+    command: >
+      -v
+      --alluredir=reports/allure-results
+      --tb=short
+      -k "not api"
+
+networks:
+  test-network:
+    driver: bridge
