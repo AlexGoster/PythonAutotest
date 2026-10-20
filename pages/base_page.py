@@ -4,6 +4,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from pathlib import Path
 
 
 class BasePage:
@@ -48,6 +49,7 @@ class BasePage:
 
     def screenshot(self, name: str) -> str:
         path = f"screenshots/{name}.png"
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
         self.driver.save_screenshot(path)
         return path
 
