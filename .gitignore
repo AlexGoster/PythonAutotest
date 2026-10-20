@@ -8,3 +8,11 @@ screenshots/
 htmlcov/
 .coverage
 node_modules/
+
+# Local verification artifacts
+coverage.xml
+*.db
+*.egg-info/
+.venv/
+build/
+dist/
