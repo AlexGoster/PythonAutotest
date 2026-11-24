@@ -9,12 +9,12 @@ load_dotenv()
 
 @dataclass
 class BrowserConfig:
-    browser_type: str = "chrome"
-    headless: bool = True
+    browser_type: str = field(default_factory=lambda: os.getenv("BROWSER", "chrome"))
+    headless: bool = field(default_factory=lambda: os.getenv("HEADLESS", "true").lower() not in {"0", "false", "no"})
     timeout: int = 30
     window_width: int = 1920
     window_height: int = 1080
-    remote_url: str = ""
+    remote_url: str = field(default_factory=lambda: os.getenv("SELENIUM_GRID_URL", ""))
 
 
 @dataclass

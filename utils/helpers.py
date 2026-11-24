@@ -4,6 +4,7 @@ import random
 import string
 import time
 from datetime import datetime
+from pathlib import Path
 
 
 def generate_email(domain: str = "test.com") -> str:
@@ -28,5 +29,6 @@ def wait_for_condition(condition, timeout: int = 10, interval: float = 0.5) -> b
 def take_screenshot(driver, name: str) -> str:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     path = f"screenshots/{name}_{timestamp}.png"
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
     driver.save_screenshot(path)
     return path
