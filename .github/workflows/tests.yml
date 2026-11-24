@@ -1,0 +1,21 @@
+name: Browser and API tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Chromium test environment
+        run: docker build -t python-autotest .
+      - name: Run tests against the local demo application
+        run: docker run --rm --network none python-autotest python -m pytest -o addopts= -q
+

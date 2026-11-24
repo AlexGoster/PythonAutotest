@@ -27,3 +27,9 @@ python -m pytest -o addopts= -q
 
 Повторить контейнерный прогон: `docker compose -p autotest-local --profile local run --rm --build tests-local`.
 Firefox и удалённый Selenium Grid не проверялись.
+
+## Повторная проверка — 24 ноября 2026
+
+Повторно прошли 12 тестов: `python -m pytest -o addopts= -q`.
+Добавлен GitHub Actions workflow для имеющегося набора тестов при push и pull request.
+Локально использованы Chrome и локальная имитация приложения; CI собирает Docker с Chromium и запускает тесты без внешней сети. Firefox и удалённый Grid повторно не проверялись.
